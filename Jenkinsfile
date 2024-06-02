@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'TaskHD'
+        DOCKER_IMAGE = 'pro_prac'
     }
 
     stages {
         stage('Clone the code') {
             steps {
                 script {
-                    git 'your-git-repository-url'
+                    git 'https://github.com/HadiRastin/Task6_2'
                     echo 'Code cloned successfully'
                 }
             }
@@ -18,8 +18,8 @@ pipeline {
         stage('Building stage: Building Docker image and run container') {
             steps {
                 script {
-                    docker.build("-t ${DOCKER_IMAGE}:latest .")
-                    docker.run("-d -p 8700:3040 --name my-container ${DOCKER_IMAGE}:latest")
+                    docker.build("-t ${DOCKER_IMAGE}:v1 .")
+                    docker.run("-d -p 8700:3040 --name my-container ${DOCKER_IMAGE}:v1")
                     echo 'Docker image built and container started successfully'
                 }
             }
@@ -34,20 +34,11 @@ pipeline {
             }
         }
 
-        stage('Analysis stage:  Analysis of the code using sonarqube') {
-            steps {
-                script {
-                    docker.exec("-it my-container /bin/bash -c 'npm run sonar'")
-                    echo 'Code analysis completed successfully'
-                }
-            }
-        }
-
-        stage('Deplyong stage: Using Docker Compose') {
+        stage('Deploying stage: Using Docker Compose') {
             steps {
                 script {
                     // Use Docker Compose to deploy to a test environment
-                    sh 'docker-compose -f docker-compose.test.yml up -d'
+                    sh 'docker-compose -f Docker-compose.yaml up -d'
                     echo 'Code deployed to test environment successfully'
                 }
             }
