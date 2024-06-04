@@ -6,6 +6,19 @@ pipeline {
     }
 
     stages {
+        stage('Ensure Docker Daemon is Running') {
+            steps {
+                script {
+                    def dockerStatus = sh(script: 'docker info', returnStatus: true)
+                    if (dockerStatus != 0) {
+                        error 'Docker daemon is not running. Please start Docker Desktop on the Jenkins server.'
+                    } else {
+                        echo 'Docker daemon is running.'
+                    }
+                }
+            }
+        }
+
         stage('Clone the code') {
             steps {
                 script {
@@ -18,7 +31,7 @@ pipeline {
         stage('Initialize') {
             steps {
                 script {
-                    def dockerHome = tool 'myDocker' // Ensure 'myDocker' is configured in Jenkins tools
+                    def dockerHome = tool 'myDocker'
                     env.PATH = "${dockerHome}/bin:${env.PATH}"
                 }
             }
