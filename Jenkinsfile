@@ -9,7 +9,7 @@ pipeline {
         stage('Clone the code') {
             steps {
                 script {
-                    git 'https://github.com/HadiRastin/Task6_2'
+                    git branch: 'main', url: 'https://github.com/HadiRastin/Task6_2'
                     echo 'Code cloned successfully'
                 }
             }
@@ -18,8 +18,10 @@ pipeline {
         stage('Building stage: Building Docker image and run container') {
             steps {
                 script {
-                    docker.build("-t ${DOCKER_IMAGE}:v1 .")
-                    docker.run("-d -p 8700:3040 --name my-container ${DOCKER_IMAGE}:v1")
+                    // Build Docker image
+                    sh "docker build -t ${DOCKER_IMAGE}:v1 ."
+                    // Run Docker container
+                    sh "docker run -d -p 8700:3040 --name my-container ${DOCKER_IMAGE}:v1"
                     echo 'Docker image built and container started successfully'
                 }
             }
@@ -28,7 +30,8 @@ pipeline {
         stage('Testing stage: Test the code using jest testing units') {
             steps {
                 script {
-                    docker.exec("-it my-container /bin/bash -c 'cd /app && npm test'")
+                    // Execute tests inside Docker container
+                    sh "docker exec my-container /bin/bash -c 'cd /app && npm test'"
                     echo 'Code tested successfully'
                 }
             }
@@ -41,6 +44,17 @@ pipeline {
                     sh 'docker-compose -f Docker-compose.yaml up -d'
                     echo 'Code deployed to test environment successfully'
                 }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Clean up Docker containers
+            script {
+                sh 'docker stop my-container'
+                sh 'docker rm my-container'
+                echo 'Clean up completed.'
             }
         }
     }
